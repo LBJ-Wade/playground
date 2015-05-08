@@ -1,0 +1,6 @@
+
+# Ignore Mathematica_IO_Behavior notebook files
+*.math_data.tsv
+*.math_data.tsv.gz
+*.math_data.h5
+*.math_data.h5
