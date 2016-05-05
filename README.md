@@ -12,3 +12,4 @@ File Descriptions
  - `Stokes_Basis_Boost.nb` - An interactive Mathematica notebook showing how measurements of vector quantities behave under a boost.
  - `Light_Deflection_Visualization.nb` - A sketch of gravitational bending of light, without being quantitatively correct.
  - `Penrose_Diagram_Transformations.nb` - The filename is pretty good on this one.
+ - `Coffee_Statistics.nb` - Stasitics for some of the voting data from the coffee website.
