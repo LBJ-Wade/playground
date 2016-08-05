@@ -1,0 +1,484 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 10.4' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[     17940,        476]
+NotebookOptionsPosition[     16959,        437]
+NotebookOutlinePosition[     17300,        452]
+CellTagsIndexPosition[     17257,        449]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell["Cartographic Distortions", "Section",
+ CellChangeTimes->{{3.679348863822052*^9, 3.679348870272899*^9}, {
+  3.6793905611654477`*^9, 3.679390561787011*^9}}],
+
+Cell[TextData[{
+ "A cartographic distortion code prototype\nBased on ",
+ StyleBox[ButtonBox["http://www.pnas.org/content/101/20/7499.full.pdf",
+  BaseStyle->"Hyperlink",
+  ButtonData->{
+    URL["http://www.pnas.org/content/101/20/7499.full.pdf"], None},
+  ButtonNote->"http://www.pnas.org/content/101/20/7499.full.pdf"],
+  FontVariations->{"Underline"->True}],
+ ", Eq. 5-7\nIntended to produce images distorted in a manner such that a \
+particular variable is equalized.\n\nThe purpose of this prototype script is \
+just to provide proof-of-concept that a diffusive method can\nbe utilized to \
+compute image distortions based on a weighting. For projects in numerical \
+relativity,\ndata (eg, the expansion rate) is often obtained on a regular \
+grid or array. However, directly plotting\nthis data (eg, making a \
+ListDensityPlot of a 2-d slice of the expansion date) will not provide an\n\
+accurate depiction of the relative volume of different regions, as the volume \
+is tracked independently\nof the coordinate system of the grid. Performing a \
+transformation of data so that volume (or area,\nin the case of a \
+2-dimensional plot) is distributed uniformly can provide a more accurate (in \
+some\nsense) physical picture of information on a slice. The most \
+straightforward way to perform this is to\nborrow algorithms from cartography \
+used for distorting maps so that a desired variable (eg, population\ndensity) \
+is normally distributed. Below is an implementation of such an algorithm.\n\n\
+Again, the below method is purely poof-of-concept, not intended to be \
+efficient or accurate. The\nimplementation below also does not handle \
+boundary conditions; a better implementation should\nperform this. Some \
+freedom exists in how the transformation can be performed; it may be possible\
+\nto perform a transformation that preserves some additional property of a \
+spacetime for a more\nrealistic rendering."
+}], "Text",
+ CellChangeTimes->{{3.6793369398767695`*^9, 3.6793369540541334`*^9}, {
+  3.6793489360149937`*^9, 3.6793492722499228`*^9}, {3.67934930438865*^9, 
+  3.6793493782631536`*^9}, {3.679349491810858*^9, 3.6793496028588495`*^9}, {
+  3.67938995671258*^9, 3.679389962451783*^9}, {3.679389993026514*^9, 
+  3.679390303547712*^9}, {3.6793903389127593`*^9, 3.679390532328313*^9}, {
+  3.679390571512823*^9, 3.6793906332315407`*^9}}],
+
+Cell[CellGroupData[{
+
+Cell["Function Definitions", "Subsection",
+ CellChangeTimes->{{3.6793367834060974`*^9, 3.679336787711933*^9}}],
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{
+   RowBox[{"R", "=", "RotateRight"}], ";"}], "\[IndentingNewLine]", 
+  RowBox[{"(*", " ", 
+   RowBox[{"Laplace", " ", "operator"}], " ", "*)"}]}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{
+    RowBox[{"\[CapitalDelta]", "[", "\[Rho]_", "]"}], ":=", 
+    RowBox[{
+     RowBox[{"R", "[", 
+      RowBox[{"\[Rho]", ",", 
+       RowBox[{"{", 
+        RowBox[{"0", ",", "1"}], "}"}]}], "]"}], "+", 
+     RowBox[{"R", "[", 
+      RowBox[{"\[Rho]", ",", 
+       RowBox[{"{", 
+        RowBox[{"1", ",", "0"}], "}"}]}], "]"}], "-", 
+     RowBox[{"4", "\[Rho]"}], "+", 
+     RowBox[{"R", "[", 
+      RowBox[{"\[Rho]", ",", 
+       RowBox[{"{", 
+        RowBox[{
+         RowBox[{"-", "1"}], ",", "0"}], "}"}]}], "]"}], "+", 
+     RowBox[{"R", "[", 
+      RowBox[{"\[Rho]", ",", 
+       RowBox[{"{", 
+        RowBox[{"0", ",", 
+         RowBox[{"-", "1"}]}], "}"}]}], "]"}]}]}], ";"}], " ", 
+  "\[IndentingNewLine]", 
+  RowBox[{"(*", " ", 
+   RowBox[{"Gradient", " ", "operator"}], " ", 
+   "*)"}]}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"V", "[", "\[Rho]_", "]"}], ":=", 
+   RowBox[{"Flatten", "[", 
+    RowBox[{
+     RowBox[{"Transpose", "[", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{
+         RowBox[{
+          RowBox[{"(", 
+           RowBox[{
+            RowBox[{"R", "[", 
+             RowBox[{"\[Rho]", ",", 
+              RowBox[{"{", 
+               RowBox[{"0", ",", "1"}], "}"}]}], "]"}], "-", 
+            RowBox[{"R", "[", 
+             RowBox[{"\[Rho]", ",", 
+              RowBox[{"{", 
+               RowBox[{"0", ",", 
+                RowBox[{"-", "1"}]}], "}"}]}], "]"}]}], ")"}], "/", 
+          "\[Rho]"}], ",", 
+         RowBox[{
+          RowBox[{"(", 
+           RowBox[{
+            RowBox[{"R", "[", 
+             RowBox[{"\[Rho]", ",", 
+              RowBox[{"{", 
+               RowBox[{"1", ",", "0"}], "}"}]}], "]"}], "-", 
+            RowBox[{"R", "[", 
+             RowBox[{"\[Rho]", ",", 
+              RowBox[{"{", 
+               RowBox[{
+                RowBox[{"-", "1"}], ",", "0"}], "}"}]}], "]"}]}], ")"}], "/", 
+          "\[Rho]"}]}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"3", ",", "2", ",", "1"}], "}"}]}], "]"}], ",", "1"}], 
+    "]"}]}], ";"}]}], "Input",
+ CellChangeTimes->{{3.679333656391508*^9, 3.6793337714511504`*^9}, {
+  3.6793343006579795`*^9, 3.6793343222694488`*^9}, {3.6793348289183636`*^9, 
+  3.679334877320342*^9}, {3.679335354785308*^9, 3.6793353600643888`*^9}, {
+  3.6793354510212803`*^9, 3.6793354534755564`*^9}, {3.6793354856006336`*^9, 
+  3.679335541722451*^9}, {3.6793378124777765`*^9, 3.6793378276233172`*^9}}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Initial Data", "Subsection",
+ CellChangeTimes->{{3.6793367901301017`*^9, 3.679336792661229*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"(*", " ", 
+   RowBox[{
+   "values", " ", "used", " ", "to", " ", "color", " ", "final", " ", 
+    "plot"}], " ", "*)"}], "\[IndentingNewLine]", 
+  RowBox[{
+   RowBox[{
+    RowBox[{"data", " ", "=", " ", 
+     RowBox[{"Table", "[", 
+      RowBox[{
+       RowBox[{"N", "[", 
+        RowBox[{
+         RowBox[{"Sin", "[", 
+          RowBox[{"4", " ", "x"}], "]"}], 
+         RowBox[{"Sin", "[", "y", "]"}]}], "]"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"x", ",", "0", ",", 
+         RowBox[{"2", "\[Pi]"}], ",", 
+         RowBox[{"\[Pi]", "/", "10"}]}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"y", ",", "0", ",", 
+         RowBox[{"2", "\[Pi]"}], ",", 
+         RowBox[{"\[Pi]", "/", "10"}]}], "}"}]}], "]"}]}], ";"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{"(*", " ", 
+    RowBox[{"property", " ", 
+     RowBox[{"(", "\"\<density\>\"", ")"}], " ", "to", " ", "equalize"}], " ",
+     "*)"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"\[Rho]0", "=", 
+     RowBox[{"\[Rho]", "=", 
+      RowBox[{"2", "+", 
+       RowBox[{"Table", "[", 
+        RowBox[{
+         RowBox[{"N", "[", 
+          RowBox[{
+           RowBox[{"Sin", "[", "x", "]"}], 
+           RowBox[{"Sin", "[", "y", "]"}]}], "]"}], ",", 
+         RowBox[{"{", 
+          RowBox[{"x", ",", "0", ",", 
+           RowBox[{"2", "\[Pi]"}], ",", 
+           RowBox[{"\[Pi]", "/", "10"}]}], "}"}], ",", 
+         RowBox[{"{", 
+          RowBox[{"y", ",", "0", ",", 
+           RowBox[{"2", "\[Pi]"}], ",", 
+           RowBox[{"\[Pi]", "/", "10"}]}], "}"}]}], "]"}]}]}]}], ";"}], " ", 
+   "\[IndentingNewLine]", "\[IndentingNewLine]", 
+   RowBox[{"GraphicsGrid", "[", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"{", "\[IndentingNewLine]", 
+       RowBox[{
+        RowBox[{"ListDensityPlot", "[", 
+         RowBox[{"data", ",", 
+          RowBox[{
+          "PlotLabel", "\[Rule]", "\"\<data to color final plot by\>\""}]}], 
+         "]"}], ",", "\[IndentingNewLine]", 
+        RowBox[{"ListDensityPlot", "[", 
+         RowBox[{"\[Rho]0", ",", " ", 
+          RowBox[{
+          "PlotLabel", "\[Rule]", "\"\<property of data to equalize\>\""}]}], 
+         "]"}]}], "\[IndentingNewLine]", "}"}], "}"}], ",", 
+     RowBox[{"ImageSize", "\[Rule]", "Large"}]}], "]"}], 
+   "\[IndentingNewLine]", "\[IndentingNewLine]", 
+   RowBox[{"(*", " ", 
+    RowBox[{
+    "Quantities", " ", "needed", " ", "to", " ", "compute", " ", 
+     "transformation"}], " ", "*)"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"Vs", "=", 
+     RowBox[{"V", "[", "\[Rho]", "]"}]}], ";"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"pts0", "=", 
+     RowBox[{"pts", "=", 
+      RowBox[{"Flatten", "[", 
+       RowBox[{
+        RowBox[{"Table", "[", 
+         RowBox[{
+          RowBox[{"{", 
+           RowBox[{"i", ",", "j"}], "}"}], ",", 
+          RowBox[{"{", 
+           RowBox[{"i", ",", 
+            RowBox[{"Length", "[", "\[Rho]0", "]"}]}], "}"}], ",", 
+          RowBox[{"{", 
+           RowBox[{"j", ",", 
+            RowBox[{"Length", "[", "\[Rho]0", "]"}]}], "}"}]}], "]"}], ",", 
+        "1"}], "]"}]}]}], ";"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"\[Rho]max", "=", 
+     RowBox[{"Max", "[", 
+      RowBox[{"Flatten", "[", "\[Rho]0", "]"}], "]"}]}], ";"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"\[Rho]min", "=", 
+     RowBox[{"Min", "[", 
+      RowBox[{"Flatten", "[", "\[Rho]0", "]"}], "]"}]}], ";"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"\[Rho]range", "=", 
+     RowBox[{"\[Rho]max", "-", "\[Rho]min"}]}], ";"}]}]}]], "Input",
+ CellChangeTimes->{{3.679335607300063*^9, 3.6793356179593887`*^9}, {
+  3.679336208952181*^9, 3.6793362226482677`*^9}, {3.6793365266846523`*^9, 
+  3.6793365357166605`*^9}, {3.679336631127273*^9, 3.67933668816082*^9}, {
+  3.679336974955511*^9, 3.6793370138945804`*^9}, {3.679337083086626*^9, 
+  3.679337110843631*^9}, {3.6793376920079093`*^9, 3.6793377028717885`*^9}, {
+  3.6793377829052567`*^9, 3.6793379651356783`*^9}, {3.679348395153002*^9, 
+  3.6793484942380986`*^9}, {3.679348525856638*^9, 3.6793485412866197`*^9}}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Distort Data", "Subsection",
+ CellChangeTimes->{{3.679348686052271*^9, 3.6793486910886073`*^9}}],
+
+Cell[CellGroupData[{
+
+Cell["Dynamic Plot", "Subsubsection",
+ CellChangeTimes->{{3.6793486984642925`*^9, 3.6793487015090523`*^9}}],
+
+Cell[BoxData[
+ RowBox[{"GraphicsGrid", "[", 
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{"{", "\[IndentingNewLine]", 
+     RowBox[{
+      RowBox[{"Dynamic", "[", 
+       RowBox[{"Show", "[", "\[IndentingNewLine]", 
+        RowBox[{
+         RowBox[{"ListDensityPlot", "[", 
+          RowBox[{"\[Rho]", ",", 
+           RowBox[{"PlotRange", "\[Rule]", "All"}], ",", 
+           RowBox[{"ColorFunctionScaling", "\[Rule]", "False"}], ",", 
+           RowBox[{"ColorFunction", "\[Rule]", 
+            RowBox[{"(", 
+             RowBox[{
+              RowBox[{
+               RowBox[{"ColorData", "[", "\"\<LightTemperatureMap\>\"", "]"}],
+                "[", 
+               RowBox[{
+                RowBox[{"(", 
+                 RowBox[{"#", "-", "\[Rho]min"}], ")"}], "/", "\[Rho]range"}],
+                "]"}], "&"}], ")"}]}]}], "]"}], ",", "\[IndentingNewLine]", 
+         RowBox[{"Graphics", "[", 
+          RowBox[{"Flatten", "[", 
+           RowBox[{"Table", "[", 
+            RowBox[{
+             RowBox[{"Arrow", "[", 
+              RowBox[{"{", 
+               RowBox[{
+                RowBox[{
+                "pts", "\[LeftDoubleBracket]", "i", "\[RightDoubleBracket]"}],
+                 ",", 
+                RowBox[{
+                 RowBox[{
+                 "pts", "\[LeftDoubleBracket]", "i", 
+                  "\[RightDoubleBracket]"}], "+", 
+                 RowBox[{
+                 "Vs", "\[LeftDoubleBracket]", "i", 
+                  "\[RightDoubleBracket]"}]}]}], "}"}], "]"}], ",", 
+             RowBox[{"{", 
+              RowBox[{"i", ",", 
+               RowBox[{"Length", "[", "pts", "]"}]}], "}"}]}], "]"}], "]"}], 
+          "]"}]}], "\[IndentingNewLine]", "]"}], "]"}], ",", 
+      "\[IndentingNewLine]", 
+      RowBox[{"Dynamic", "[", 
+       RowBox[{"Show", "[", "\[IndentingNewLine]", 
+        RowBox[{
+         RowBox[{"ListDensityPlot", "[", 
+          RowBox[{"\[Rho]0", ",", 
+           RowBox[{"PlotRange", "\[Rule]", "All"}], ",", 
+           RowBox[{"ColorFunctionScaling", "\[Rule]", "False"}], ",", 
+           RowBox[{"ColorFunction", "\[Rule]", 
+            RowBox[{"(", 
+             RowBox[{
+              RowBox[{
+               RowBox[{"ColorData", "[", "\"\<LightTemperatureMap\>\"", "]"}],
+                "[", 
+               RowBox[{
+                RowBox[{"(", 
+                 RowBox[{"#", "-", "\[Rho]min"}], ")"}], "/", "\[Rho]range"}],
+                "]"}], "&"}], ")"}]}]}], "]"}], ",", "\[IndentingNewLine]", 
+         RowBox[{"Graphics", "[", 
+          RowBox[{"{", 
+           RowBox[{"Red", ",", 
+            RowBox[{"Point", "/@", "pts0"}]}], "}"}], "]"}], ",", 
+         "\[IndentingNewLine]", 
+         RowBox[{"Graphics", "[", 
+          RowBox[{"{", 
+           RowBox[{"Green", ",", 
+            RowBox[{"Point", "/@", "pts"}]}], "}"}], "]"}]}], 
+        "\[IndentingNewLine]", "]"}], "]"}]}], "\[IndentingNewLine]", "}"}], 
+    "}"}], ",", 
+   RowBox[{"ImageSize", "\[Rule]", "Large"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.6793355613452916`*^9, 3.6793357342210913`*^9}, {
+  3.679335764786209*^9, 3.67933576752306*^9}, {3.6793358705185823`*^9, 
+  3.679335874694311*^9}, {3.6793359143143096`*^9, 3.679335936719191*^9}, {
+  3.6793361791470375`*^9, 3.6793361823227196`*^9}, {3.679336540869853*^9, 
+  3.679336546542703*^9}, {3.679336576794238*^9, 3.679336628377076*^9}, {
+  3.679336658837618*^9, 3.679336659907672*^9}, {3.679336695016117*^9, 
+  3.679336737421629*^9}, {3.6793370681334815`*^9, 3.679337068323914*^9}, {
+  3.679337160729761*^9, 3.679337223480856*^9}, {3.6793372559166965`*^9, 
+  3.67933728996037*^9}}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Update dynamic plot (animate)", "Subsubsection",
+ CellChangeTimes->{{3.679348705908039*^9, 3.679348720114912*^9}}],
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"dt", "=", "0.05"}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{"Do", "[", "\[IndentingNewLine]", 
+  RowBox[{
+   RowBox[{
+    RowBox[{"Vs", "=", 
+     RowBox[{"V", "[", "\[Rho]", "]"}]}], ";", "\[IndentingNewLine]", 
+    RowBox[{"pts", "+=", 
+     RowBox[{"dt", " ", "Vs"}]}], ";", "\[IndentingNewLine]", 
+    RowBox[{"\[Rho]", "+=", 
+     RowBox[{"dt", " ", 
+      RowBox[{"\[CapitalDelta]", "[", "\[Rho]", "]"}]}]}], ";", 
+    "\[IndentingNewLine]", 
+    RowBox[{"Pause", "[", "0.02", "]"}], ";"}], " ", 
+   RowBox[{"(*", " ", 
+    RowBox[{"Pause", " ", "between", " ", "steps", " ", "so", "  ", "run"}], 
+    " ", "*)"}], "\[IndentingNewLine]", ",", 
+   RowBox[{"{", 
+    RowBox[{"i", ",", "300"}], "}"}]}], " ", 
+  RowBox[{"(*", " ", 
+   RowBox[{
+    RowBox[{
+    "Should", " ", "be", " ", "some", " ", "accuracy", " ", "threshhold"}], 
+    ",", " ", 
+    RowBox[{"rather", " ", "than", " ", "#", " ", "iterations"}]}], " ", 
+   "*)"}], "\[IndentingNewLine]", "]"}]}], "Input",
+ CellChangeTimes->{{3.679335437158225*^9, 3.679335466685855*^9}, {
+  3.679335503314176*^9, 3.6793355036971917`*^9}, {3.6793355471273947`*^9, 
+  3.679335547743219*^9}, {3.679336098328683*^9, 3.679336188442836*^9}, {
+  3.6793362389382615`*^9, 3.6793363204826345`*^9}, {3.6793363885725784`*^9, 
+  3.6793364019580536`*^9}, {3.6793365641362553`*^9, 3.6793365675936174`*^9}, {
+  3.6793373140021143`*^9, 3.6793373143974133`*^9}, {3.67934872418565*^9, 
+  3.679348751383479*^9}, {3.679348781591861*^9, 3.679348806571491*^9}, {
+  3.679389096294554*^9, 3.6793891003802567`*^9}}]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Final Plot", "Subsection",
+ CellChangeTimes->{{3.6793486783893275`*^9, 3.679348681129809*^9}}],
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"newdata", "=", 
+   RowBox[{"Interpolation", "[", 
+    RowBox[{"Table", "[", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"pts", "\[LeftDoubleBracket]", 
+         RowBox[{"p", ",", "1"}], "\[RightDoubleBracket]"}], ",", 
+        RowBox[{"pts", "\[LeftDoubleBracket]", 
+         RowBox[{"p", ",", "2"}], "\[RightDoubleBracket]"}], ",", 
+        RowBox[{
+         RowBox[{"Flatten", "[", 
+          RowBox[{"data", "\[Transpose]"}], "]"}], "\[LeftDoubleBracket]", 
+         "p", "\[RightDoubleBracket]"}]}], "}"}], ",", 
+      RowBox[{"{", 
+       RowBox[{"p", ",", 
+        RowBox[{"Length", "[", "pts", "]"}]}], "}"}]}], "]"}], "]"}]}], 
+  ";"}], "\[IndentingNewLine]", 
+ RowBox[{"DensityPlot", "[", 
+  RowBox[{
+   RowBox[{"newdata", "[", 
+    RowBox[{"x", ",", "y"}], "]"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"x", ",", "1", ",", "21"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"y", ",", "1", ",", "21"}], "}"}], ",", 
+   RowBox[{"PlotPoints", "\[Rule]", "50"}]}], "]"}]}], "Input"]
+}, Open  ]]
+}, Open  ]]
+},
+WindowSize->{1596, 818},
+WindowMargins->{{Automatic, 0}, {Automatic, 0}},
+FrontEndVersion->"10.2 for Microsoft Windows (64-bit) (July 29, 2015)",
+StyleDefinitions->"Default.nb"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[580, 22, 160, 2, 70, "Section"],
+Cell[743, 26, 2352, 35, 391, "Text"],
+Cell[CellGroupData[{
+Cell[3120, 65, 110, 1, 49, "Subsection"],
+Cell[3233, 68, 2657, 76, 112, "Input"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[5927, 149, 102, 1, 49, "Subsection"],
+Cell[6032, 152, 4101, 107, 332, "Input"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[10170, 264, 102, 1, 49, "Subsection"],
+Cell[CellGroupData[{
+Cell[10297, 269, 107, 1, 39, "Subsubsection"],
+Cell[10407, 272, 3589, 82, 232, "Input"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[14033, 359, 120, 1, 39, "Subsubsection"],
+Cell[14156, 362, 1581, 34, 172, "Input"]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[15786, 402, 100, 1, 49, "Subsection"],
+Cell[15889, 405, 1042, 28, 52, "Input"]
+}, Open  ]]
+}, Open  ]]
+}
+]
+*)
+
