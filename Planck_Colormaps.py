@@ -8,7 +8,8 @@ import matplotlib.colors as colors
 
 def _create_cmap(name, Itab, Rtab, Gtab, Btab) :
     """Helper function to create a color map from tabulated values copied
-    from the HEALPix IDL code."""
+    from the HEALPix IDL code.  This assumes the tabulated values are
+    integers from 0 to 255."""
     red = np.array([ Itab/255., Rtab/255., Rtab/255. ])
     blue = np.array([ Itab/255., Btab/255., Btab/255. ])
     green = np.array([ Itab/255., Gtab/255., Gtab/255. ])
