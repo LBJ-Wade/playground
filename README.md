@@ -14,4 +14,4 @@ File Descriptions
  - `Penrose_Diagram_Transformations.nb` - The filename is pretty good on this one.
  - `Coffee_Statistics.nb` - Statistics for some of the voting data from the coffee website.
  - `Cartogram_Equalization.nb` - A Mathematica notebook for distorting images by equalizing some property.
-- `Planck_Colormaps.py` - Construct Planck color maps for use with matplotlib in Python.  Derived from HEALPix code.
+ - `Planck_Colormaps.py` - Construct Planck color maps for use with matplotlib in Python.  Derived from HEALPix code.
