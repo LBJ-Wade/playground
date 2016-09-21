@@ -15,3 +15,4 @@ File Descriptions
  - `Coffee_Statistics.nb` - Statistics for some of the voting data from the coffee website.
  - `Cartogram_Equalization.nb` - A Mathematica notebook for distorting images by equalizing some property.
  - `Planck_Colormaps.py` - Construct Planck color maps for use with matplotlib in Python.  Derived from HEALPix code.
+ - `Planck_T_Colormap_RGB.dat` - Table of RGB values for the Planck temperature color map.  (Can be used to construct you own color map.)
